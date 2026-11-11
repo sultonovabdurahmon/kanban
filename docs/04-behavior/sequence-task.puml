@@ -1,0 +1,38 @@
+@startuml sequence-task
+skinparam dpi 150
+title Кашидани корт ба сутуни дигар (POST /api.php?action=task_move)
+
+actor "Иштирокчӣ\n(member)" as U
+participant "Браузер\n(app.js)" as B
+participant "api.php\n+ Router" as R
+participant "TaskController" as C
+participant "Auth" as A
+participant "TaskRepository" as Repo
+database "MySQL\nkanban" as DB
+
+U -> B : кашида ба сутуни «Иҷрошуда» мемонад (drop)
+B -> R : POST /api.php?action=task_move\n{task_id, column_id, position} (fetch, JSON)
+R -> C : move(taskId, columnId, position)
+C -> Repo : findById(taskId)
+Repo -> DB : SELECT * FROM tasks WHERE id = ?
+DB --> Repo : сатри вазифа
+Repo --> C : вазифа (project_id, assignee_id)
+C -> A : role(projectId)
+A -> DB : SELECT role FROM project_members\nWHERE project_id = ? AND user_id = ?
+DB --> A : member
+A --> C : 'member'
+alt нақш manager ё иҷрокунандаи худи вазифа
+  C -> Repo : updateColumn(taskId, columnId)
+  Repo -> DB : UPDATE tasks SET column_id = ? WHERE id = ?
+  C -> Repo : reorder(columnId, ids)
+  Repo -> DB : UPDATE tasks SET position = ? (барои ҳар корт)
+  C -> Repo : addHistory(taskId, userId, 'move', 'сутун: «Дар иҷро» → «Иҷрошуда»')
+  Repo -> DB : INSERT INTO task_history (task_id, user_id, action, details)
+  DB --> Repo : сатр илова шуд
+  Repo --> C : ок
+  C --> B : 200 {"ok": true}
+else вазифаи бегона
+  C --> B : 403 {"error": "Шумо танҳо вазифаҳои худро кашида метавонед"}
+end
+B --> U : корт дар сутуни нав намоён мешавад (ё хато)
+@enduml

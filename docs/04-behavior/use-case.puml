@@ -1,0 +1,50 @@
+@startuml use-case
+left to right direction
+skinparam dpi 150
+title Kanban: вариантҳои истифода
+
+actor "Иштирокчӣ\n(member)" as M
+actor "Роҳбари лоиҳа\n(manager)" as P
+
+' Роҳбар низ иштирокчӣ аст ва ҳамаи вариантҳои ӯро мерос мегирад
+P --|> M
+
+rectangle "Kanban" {
+  usecase "Сабти ном ва вуруд" as UC1
+  usecase "Дидани тахта ва вазифаҳои худ" as UC2
+  usecase "Кашидани корт байни сутунҳо" as UC3
+  usecase "Дидани корти вазифа" as UC4
+  usecase "Навиштани шарҳ" as UC5
+  usecase "Замима кардани файл" as UC6
+  usecase "Филтр аз рӯи иҷрокунанда ва мӯҳлат" as UC7
+  usecase "Дидани вазифаҳои мӯҳлаташон гузашта" as UC8
+  usecase "Дидани таърихи тағйирот" as UC9
+  usecase "Сохтани лоиҳа" as UC10
+  usecase "Илова кардани иштирокчӣ" as UC11
+  usecase "Сохтани сутунҳои тахта" as UC12
+  usecase "Сохтани вазифа ва таъини иҷрокунанда" as UC13
+  usecase "Таҳрири вазифа" as UC14
+  usecase "Сабти таърихи тағйирот" as UC15
+}
+
+M --> UC1
+M --> UC2
+M --> UC3
+M --> UC4
+M --> UC5
+M --> UC7
+M --> UC8
+M --> UC9
+P --> UC10
+P --> UC11
+P --> UC12
+P --> UC13
+P --> UC14
+
+' include: сабти таърих ҳамеша иҷро мешавад
+UC3 ..> UC15 : <<include>>
+UC13 ..> UC15 : <<include>>
+UC14 ..> UC15 : <<include>>
+' extend: замима ихтиёрӣ аст, ҳангоми дидани корт
+UC6 ..> UC4 : <<extend>>
+@enduml
