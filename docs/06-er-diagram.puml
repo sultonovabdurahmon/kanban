@@ -1,0 +1,105 @@
+@startuml er-diagram
+title Kanban: модели мантиқӣ (ER, Crow's Foot)
+hide circle
+skinparam dpi 150
+skinparam linetype ortho
+
+entity users {
+  * id : INT <<PK>>
+  --
+  * name : VARCHAR(100)
+  * email : VARCHAR(150) <<UQ>>
+  * password_hash : VARCHAR(255)
+  * created_at : TIMESTAMP
+}
+
+entity projects {
+  * id : INT <<PK>>
+  --
+  * name : VARCHAR(150)
+  description : TEXT
+  * owner_id : INT <<FK>>
+  * created_at : TIMESTAMP
+}
+
+entity project_members {
+  * id : INT <<PK>>
+  --
+  * project_id : INT <<FK, UQ>>
+  * user_id : INT <<FK, UQ>>
+  * role : ENUM('manager','member')
+}
+
+entity columns {
+  * id : INT <<PK>>
+  --
+  * project_id : INT <<FK>>
+  * title : VARCHAR(100)
+  * position : INT
+}
+
+entity tasks {
+  * id : INT <<PK>>
+  --
+  * project_id : INT <<FK>>
+  * column_id : INT <<FK>>
+  * title : VARCHAR(200)
+  description : TEXT
+  assignee_id : INT <<FK>>
+  due_date : DATE
+  * priority : ENUM('low','medium','high')
+  * position : INT
+  * created_by : INT <<FK>>
+  * created_at : TIMESTAMP
+}
+
+entity task_comments {
+  * id : INT <<PK>>
+  --
+  * task_id : INT <<FK>>
+  * user_id : INT <<FK>>
+  * body : TEXT
+  * created_at : TIMESTAMP
+}
+
+entity task_history {
+  * id : INT <<PK>>
+  --
+  * task_id : INT <<FK>>
+  * user_id : INT <<FK>>
+  * action : VARCHAR(30)
+  details : TEXT
+  * created_at : TIMESTAMP
+}
+
+entity task_attachments {
+  * id : INT <<PK>>
+  --
+  * task_id : INT <<FK>>
+  * user_id : INT <<FK>>
+  * original_name : VARCHAR(255)
+  * stored_name : VARCHAR(255) <<UQ>>
+  * created_at : TIMESTAMP
+}
+
+users ||--o{ projects : owner_id
+projects ||--|{ project_members
+users ||--o{ project_members
+projects ||--|{ columns
+projects ||--o{ tasks
+columns ||--o{ tasks
+users |o--o{ tasks : assignee_id
+users ||--o{ tasks : created_by
+tasks ||--o{ task_comments
+users ||--o{ task_comments
+tasks ||--o{ task_history
+users ||--o{ task_history
+tasks ||--o{ task_attachments
+users ||--o{ task_attachments
+
+legend right
+  * — атрибути ҳатмӣ (NOT NULL)
+  PK — калиди асосӣ, FK — калиди берунӣ, UQ — UNIQUE
+  M:N «users — projects» тавассути project_members
+endlegend
+@enduml
