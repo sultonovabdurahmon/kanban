@@ -1,0 +1,29 @@
+@startuml deployment
+title Kanban: диаграммаи ҷойгиркунӣ
+skinparam dpi 150
+
+node "Компютери корбар" as pc {
+  artifact "Браузер\n(Chrome / Firefox / Edge)" as browser
+}
+
+node "Веб-сервер (XAMPP: Apache 2.4 + PHP 8.2)" as web {
+  artifact "index.html, style.css, app.js\n(интерфейс)" as front
+  artifact "api.php\n(сервер, PDO, сессияҳо)" as api
+  folder "uploads/\n(файлҳои замима)" as uploads
+}
+
+node "Сервери пойгоҳи додаҳо" as dbnode {
+  database "MariaDB 10.x\nkanban (utf8mb4, InnoDB)" as db
+}
+
+browser --> front : HTTP GET :80\n(HTML, CSS, JS)
+browser --> api : HTTP POST :80\napi.php?action=... (JSON, fetch)
+api --> db : PDO MySQL\n127.0.0.1:3306
+api ..> uploads : навиштани файлҳо\n(move_uploaded_file)
+browser ..> uploads : GET /uploads/<файл>
+
+note bottom of web
+  Дар хостинги воқеӣ: HTTPS :443,
+  дар uploads/ иҷрои PHP манъ аст (.htaccess)
+end note
+@enduml
